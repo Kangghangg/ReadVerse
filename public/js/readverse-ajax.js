@@ -1287,3 +1287,77 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadFileInChunks(chunkInput.files[0], targetType);
     });
 });
+
+
+;(function () {
+    if (window.__rvDropdownStackFixApplied) return;
+    window.__rvDropdownStackFixApplied = true;
+
+    function syncDropdownAncestors() {
+        document.querySelectorAll('.rv-dropdown-row-active, .rv-dropdown-cell-active, .rv-dropdown-parent-active').forEach(function (el) {
+            el.classList.remove('rv-dropdown-row-active', 'rv-dropdown-cell-active', 'rv-dropdown-parent-active');
+        });
+        document.querySelectorAll('[data-rv-temp-overflow]').forEach(function (el) {
+            el.style.overflow = el.getAttribute('data-rv-temp-overflow') || '';
+            el.removeAttribute('data-rv-temp-overflow');
+        });
+
+        document.querySelectorAll('.rv-popover-open').forEach(function (menu) {
+            menu.style.zIndex = '99999';
+            menu.style.backgroundColor = '#FFFDF9';
+
+            var wrapper = menu.parentElement;
+            if (wrapper) {
+                wrapper.classList.add('rv-dropdown-parent-active');
+            }
+            var form = menu.closest('form');
+            if (form) {
+                form.classList.add('rv-dropdown-parent-active');
+            }
+            var td = menu.closest('td');
+            if (td) {
+                td.classList.add('rv-dropdown-cell-active');
+            }
+            var tr = menu.closest('tr');
+            if (tr) {
+                tr.classList.add('rv-dropdown-row-active');
+            }
+
+            var anc = menu.parentElement;
+            while (anc && anc !== document.body) {
+                var cs = window.getComputedStyle(anc);
+                if (cs.overflow === 'hidden' || cs.overflowY === 'hidden' || cs.overflowX === 'auto' || cs.overflowX === 'hidden') {
+                    if (!anc.hasAttribute('data-rv-temp-overflow')) {
+                        anc.setAttribute('data-rv-temp-overflow', anc.style.overflow || '');
+                    }
+                    anc.style.overflow = 'visible';
+                }
+                anc = anc.parentElement;
+            }
+        });
+    }
+
+    var obs = new MutationObserver(function () {
+        syncDropdownAncestors();
+    });
+
+    function startObserver() {
+        if (document.body) {
+            obs.observe(document.body, {
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class']
+            });
+            syncDropdownAncestors();
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startObserver);
+    } else {
+        startObserver();
+    }
+    document.addEventListener('click', function () {
+        setTimeout(syncDropdownAncestors, 10);
+    }, true);
+})();

@@ -1,2 +1,5 @@
-*
 !.gitignore
+!ebooks/
+!ebooks/**
+!authors/
+!authors/**

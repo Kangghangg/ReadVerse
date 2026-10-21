@@ -34,11 +34,20 @@
 @keyframes rvAppleFadeIn {
     0% {
         opacity: 0;
-        transform: translate3d(0, 10px, 0) scale(0.985);
+        transform: translate3d(0, 8px, 0);
     }
     100% {
         opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
+        transform: none;
+    }
+}
+
+@keyframes rvAppleRowFade {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
     }
 }
 
@@ -49,7 +58,7 @@
     }
     100% {
         opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
+        transform: none;
     }
 }
 
@@ -110,7 +119,6 @@
     }
 
     #catalog-grid-wrapper article {
-        will-change: transform, opacity;
         animation: rvAppleCardRise 460ms var(--apple-ease-out) both;
     }
 
@@ -130,7 +138,6 @@
     #catalog-grid-wrapper article > a.aspect-\[3\/4\],
     article.group > a.aspect-\[3\/4\] {
         transition: transform 480ms var(--apple-ease-out), box-shadow 480ms var(--apple-ease-out);
-        will-change: transform, box-shadow;
     }
 
     #catalog-grid-wrapper article:hover > a.aspect-\[3\/4\],
@@ -142,7 +149,6 @@
     #catalog-grid-wrapper article > a.aspect-\[3\/4\] img,
     article.group > a.aspect-\[3\/4\] img {
         transition: transform 560ms var(--apple-ease-out);
-        will-change: transform;
     }
 
     #catalog-grid-wrapper article:hover > a.aspect-\[3\/4\] img,
@@ -151,35 +157,58 @@
     }
 
     tbody tr {
-        transition: background-color 220ms var(--apple-ease-out), transform 220ms var(--apple-ease-out);
-        animation: rvAppleFadeIn 340ms var(--apple-ease-out) both;
+        position: relative;
+        z-index: 1;
+        transition: background-color 220ms var(--apple-ease-out);
+        animation: rvAppleRowFade 280ms var(--apple-ease-out) both;
     }
 
     tbody tr:hover {
         background-color: rgba(233, 221, 203, 0.32);
     }
 
+    tbody tr:has(.rv-popover-open),
+    tbody tr.rv-dropdown-row-active {
+        position: relative !important;
+        z-index: 9990 !important;
+    }
+
+    td:has(.rv-popover-open),
+    td.rv-dropdown-cell-active {
+        position: relative !important;
+        z-index: 9990 !important;
+        overflow: visible !important;
+    }
+
+    .rv-dropdown-parent-active {
+        position: relative !important;
+        z-index: 9990 !important;
+        overflow: visible !important;
+    }
+
     .rv-popover-animated {
         transform-origin: top center;
+        background-color: #FFFDF9 !important;
         transition:
-            opacity 220ms var(--apple-ease-out),
-            transform 260ms var(--apple-spring),
-            filter 220ms var(--apple-ease-out);
-        will-change: opacity, transform, filter;
+            opacity 180ms var(--apple-ease-out),
+            transform 220ms var(--apple-spring);
     }
 
     .rv-popover-closed {
-        opacity: 0;
-        transform: translate3d(0, -8px, 0) scale(0.96);
-        filter: blur(4px);
-        pointer-events: none;
+        opacity: 0 !important;
+        transform: translate3d(0, -6px, 0) scale(0.96);
+        pointer-events: none !important;
+        visibility: hidden;
     }
 
     .rv-popover-open {
-        opacity: 1;
+        opacity: 1 !important;
         transform: translate3d(0, 0, 0) scale(1);
-        filter: blur(0px);
-        pointer-events: auto;
+        pointer-events: auto !important;
+        visibility: visible;
+        z-index: 99999 !important;
+        background-color: #FFFDF9 !important;
+        box-shadow: 0 20px 38px -8px rgba(42, 32, 25, 0.28), 0 0 0 1px rgba(216, 197, 170, 0.9) !important;
     }
 
     .rv-heart-pop svg {
@@ -187,6 +216,6 @@
     }
 
     .rv-view-enter {
-        animation: rvAppleFadeIn 380ms var(--apple-ease-out) both;
+        animation: rvAppleFadeIn 350ms var(--apple-ease-out) both;
     }
 }
