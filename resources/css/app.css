@@ -1,0 +1,192 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --apple-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        --apple-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --apple-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        @apply bg-cream text-ink;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        @apply font-serif;
+    }
+
+    ::selection {
+        @apply bg-beige text-ink;
+    }
+}
+
+@keyframes rvAppleFadeIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 10px, 0) scale(0.985);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes rvAppleCardRise {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 16px, 0) scale(0.97);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes rvHeartPop {
+    0% {
+        transform: scale(1);
+    }
+    35% {
+        transform: scale(1.32);
+    }
+    65% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-lg bg-espresso px-5 py-2.5 text-sm font-medium text-cream transition hover:bg-mocha focus:outline-none focus:ring-2 focus:ring-mocha/40;
+    }
+
+    .btn-outline {
+        @apply inline-flex items-center justify-center rounded-lg border border-espresso px-5 py-2.5 text-sm font-medium text-espresso transition hover:bg-espresso hover:text-cream focus:outline-none focus:ring-2 focus:ring-mocha/40;
+    }
+
+    .input-field {
+        @apply w-full rounded-lg border-beige bg-white px-4 py-2.5 text-sm text-ink placeholder:text-taupe focus:border-mocha focus:ring-mocha/30;
+    }
+
+    .rv-hero-vignette {
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse 84% 78% at 50% 50%, rgba(42, 32, 25, 0) 0%, rgba(42, 32, 25, 0.04) 54%, rgba(58, 43, 31, 0.36) 82%, rgba(42, 32, 25, 0.72) 100%),
+            linear-gradient(180deg, rgba(42, 32, 25, 0.42) 0%, rgba(42, 32, 25, 0) 24%, rgba(42, 32, 25, 0) 76%, rgba(42, 32, 25, 0.48) 100%),
+            linear-gradient(90deg, rgba(42, 32, 25, 0.45) 0%, rgba(42, 32, 25, 0) 16%, rgba(42, 32, 25, 0) 84%, rgba(42, 32, 25, 0.45) 100%);
+        box-shadow: inset 0 0 75px 18px rgba(42, 32, 25, 0.46);
+    }
+
+    a,
+    button,
+    input,
+    textarea,
+    .rv-custom-select-trigger {
+        transition-property: color, background-color, border-color, box-shadow, transform, opacity, filter;
+        transition-duration: 280ms;
+        transition-timing-function: var(--apple-ease-out);
+    }
+
+    button:active:not(:disabled),
+    a[data-ajax-catalog-link="true"]:active,
+    a[data-ajax-admin-tab="true"]:active,
+    a[data-spa-nav="true"]:active,
+    .rv-custom-select-trigger:active {
+        transform: scale(0.96);
+        transition-duration: 110ms;
+    }
+
+    #catalog-grid-wrapper article {
+        will-change: transform, opacity;
+        animation: rvAppleCardRise 460ms var(--apple-ease-out) both;
+    }
+
+    #catalog-grid-wrapper article:nth-child(1) { animation-delay: 0ms; }
+    #catalog-grid-wrapper article:nth-child(2) { animation-delay: 25ms; }
+    #catalog-grid-wrapper article:nth-child(3) { animation-delay: 50ms; }
+    #catalog-grid-wrapper article:nth-child(4) { animation-delay: 75ms; }
+    #catalog-grid-wrapper article:nth-child(5) { animation-delay: 100ms; }
+    #catalog-grid-wrapper article:nth-child(6) { animation-delay: 125ms; }
+    #catalog-grid-wrapper article:nth-child(7) { animation-delay: 150ms; }
+    #catalog-grid-wrapper article:nth-child(8) { animation-delay: 175ms; }
+    #catalog-grid-wrapper article:nth-child(9) { animation-delay: 200ms; }
+    #catalog-grid-wrapper article:nth-child(10) { animation-delay: 225ms; }
+    #catalog-grid-wrapper article:nth-child(11) { animation-delay: 250ms; }
+    #catalog-grid-wrapper article:nth-child(12) { animation-delay: 275ms; }
+
+    #catalog-grid-wrapper article > a.aspect-\[3\/4\],
+    article.group > a.aspect-\[3\/4\] {
+        transition: transform 480ms var(--apple-ease-out), box-shadow 480ms var(--apple-ease-out);
+        will-change: transform, box-shadow;
+    }
+
+    #catalog-grid-wrapper article:hover > a.aspect-\[3\/4\],
+    article.group:hover > a.aspect-\[3\/4\] {
+        transform: translate3d(0, -6px, 0) scale(1.015);
+        box-shadow: 0 20px 32px -10px rgba(42, 32, 25, 0.22), 0 8px 16px -6px rgba(42, 32, 25, 0.12);
+    }
+
+    #catalog-grid-wrapper article > a.aspect-\[3\/4\] img,
+    article.group > a.aspect-\[3\/4\] img {
+        transition: transform 560ms var(--apple-ease-out);
+        will-change: transform;
+    }
+
+    #catalog-grid-wrapper article:hover > a.aspect-\[3\/4\] img,
+    article.group:hover > a.aspect-\[3\/4\] img {
+        transform: scale(1.045);
+    }
+
+    tbody tr {
+        transition: background-color 220ms var(--apple-ease-out), transform 220ms var(--apple-ease-out);
+        animation: rvAppleFadeIn 340ms var(--apple-ease-out) both;
+    }
+
+    tbody tr:hover {
+        background-color: rgba(233, 221, 203, 0.32);
+    }
+
+    .rv-popover-animated {
+        transform-origin: top center;
+        transition:
+            opacity 220ms var(--apple-ease-out),
+            transform 260ms var(--apple-spring),
+            filter 220ms var(--apple-ease-out);
+        will-change: opacity, transform, filter;
+    }
+
+    .rv-popover-closed {
+        opacity: 0;
+        transform: translate3d(0, -8px, 0) scale(0.96);
+        filter: blur(4px);
+        pointer-events: none;
+    }
+
+    .rv-popover-open {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+        filter: blur(0px);
+        pointer-events: auto;
+    }
+
+    .rv-heart-pop svg {
+        animation: rvHeartPop 420ms var(--apple-spring);
+    }
+
+    .rv-view-enter {
+        animation: rvAppleFadeIn 380ms var(--apple-ease-out) both;
+    }
+}
