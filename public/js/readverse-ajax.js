@@ -591,14 +591,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } else {
-            const currentShell = document.getElementById('rv-page-shell') || document.getElementById('rv-main-view');
-            const newShell = doc.getElementById('rv-page-shell') || doc.getElementById('rv-main-view');
+            const currentShell = document.getElementById('rv-page-shell') || document.getElementById('rv-main-view') || document.getElementById('app-main-content');
+            const newShell = doc.getElementById('rv-page-shell') || doc.getElementById('rv-main-view') || doc.getElementById('app-main-content');
             if (currentShell && newShell) {
                 currentShell.innerHTML = newShell.innerHTML;
                 currentShell.classList.remove('rv-view-enter');
                 void currentShell.offsetWidth;
                 currentShell.classList.add('rv-view-enter');
                 hydratePageComponents(currentShell);
+            } else if (!onlyCatalog) {
+                window.location.href = targetUrl || window.location.href;
+                return;
             }
 
             const currentDesktopNav = document.getElementById('rv-desktop-nav');
@@ -1288,76 +1291,74 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
 ;(function () {
-    if (window.__rvDropdownStackFixApplied) return;
-    window.__rvDropdownStackFixApplied = true;
+    if (window.__rvCartAndRejectEnhancements) return;
+    window.__rvCartAndRejectEnhancements = true;
 
-    function syncDropdownAncestors() {
-        document.querySelectorAll('.rv-dropdown-row-active, .rv-dropdown-cell-active, .rv-dropdown-parent-active').forEach(function (el) {
-            el.classList.remove('rv-dropdown-row-active', 'rv-dropdown-cell-active', 'rv-dropdown-parent-active');
-        });
-        document.querySelectorAll('[data-rv-temp-overflow]').forEach(function (el) {
-            el.style.overflow = el.getAttribute('data-rv-temp-overflow') || '';
-            el.removeAttribute('data-rv-temp-overflow');
-        });
+    document.addEventListener('click', function (e) {
+        var openBtn = e.target.closest('[data-open-reject-modal="true"]');
+        if (openBtn && window.rvOpenRejectModal) {
+            e.preventDefault();
+            window.rvOpenRejectModal(openBtn);
+            return;
+        }
 
-        document.querySelectorAll('.rv-popover-open').forEach(function (menu) {
-            menu.style.zIndex = '99999';
-            menu.style.backgroundColor = '#FFFDF9';
+        var closeBtn = e.target.closest('[data-close-reject-modal="true"]');
+        if (closeBtn && window.rvCloseRejectModal) {
+            e.preventDefault();
+            window.rvCloseRejectModal();
+            return;
+        }
 
-            var wrapper = menu.parentElement;
-            if (wrapper) {
-                wrapper.classList.add('rv-dropdown-parent-active');
-            }
-            var form = menu.closest('form');
-            if (form) {
-                form.classList.add('rv-dropdown-parent-active');
-            }
-            var td = menu.closest('td');
-            if (td) {
-                td.classList.add('rv-dropdown-cell-active');
-            }
-            var tr = menu.closest('tr');
-            if (tr) {
-                tr.classList.add('rv-dropdown-row-active');
-            }
-
-            var anc = menu.parentElement;
-            while (anc && anc !== document.body) {
-                var cs = window.getComputedStyle(anc);
-                if (cs.overflow === 'hidden' || cs.overflowY === 'hidden' || cs.overflowX === 'auto' || cs.overflowX === 'hidden') {
-                    if (!anc.hasAttribute('data-rv-temp-overflow')) {
-                        anc.setAttribute('data-rv-temp-overflow', anc.style.overflow || '');
-                    }
-                    anc.style.overflow = 'visible';
-                }
-                anc = anc.parentElement;
-            }
-        });
-    }
-
-    var obs = new MutationObserver(function () {
-        syncDropdownAncestors();
+        var chipBtn = e.target.closest('[data-reason-chip]');
+        if (chipBtn && window.rvPickRejectReason) {
+            e.preventDefault();
+            window.rvPickRejectReason(chipBtn);
+            return;
+        }
     });
 
-    function startObserver() {
-        if (document.body) {
-            obs.observe(document.body, {
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['class']
-            });
-            syncDropdownAncestors();
-        }
-    }
+    document.addEventListener('submit', function (e) {
+        var cartForm = e.target.closest('form[data-ajax-cart-form="true"]');
+        if (!cartForm) return;
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', startObserver);
-    } else {
-        startObserver();
-    }
-    document.addEventListener('click', function () {
-        setTimeout(syncDropdownAncestors, 10);
-    }, true);
+        e.preventDefault();
+        var isCompact = cartForm.getAttribute('data-compact-cart') === 'true';
+        var submitBtn = cartForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+
+        var csrf = document.querySelector('meta[name="csrf-token"]');
+        fetch(cartForm.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrf ? csrf.getAttribute('content') : '',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (res && res.success) {
+                var badge = document.getElementById('nav-cart-count');
+                if (badge) {
+                    badge.textContent = res.cart_count;
+                    badge.classList.remove('hidden');
+                }
+                if (submitBtn) {
+                    if (isCompact) {
+                        submitBtn.outerHTML = '<a href="' + (res.cart_url || '/cart') + '" class="inline-flex h-8 items-center justify-center rounded-lg bg-mocha px-2.5 text-[11px] font-semibold leading-none text-cream transition hover:bg-espresso">Trong giỏ</a>';
+                    } else {
+                        submitBtn.outerHTML = '<a href="' + (res.cart_url || '/cart') + '" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-mocha py-3.5 px-5 text-center text-sm font-bold text-cream shadow-md transition hover:bg-espresso"><span>Đã có trong giỏ hàng — Xem giỏ hàng</span></a>';
+                    }
+                }
+            } else if (res && res.read_url) {
+                window.location.href = res.read_url;
+            } else {
+                cartForm.submit();
+            }
+        })
+        .catch(function () {
+            cartForm.submit();
+        });
+    });
 })();

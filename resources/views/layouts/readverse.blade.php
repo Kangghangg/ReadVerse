@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html lang="vi" class="h-full bg-cream">
-
+<html lang="vi" class="bg-cream">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'ReadVerse')</title>
-    @php
-        $favFile = file_exists(public_path('images/Icontab.png')) ? 'images/Icontab.png' : 'favicon.ico';
-        $favVer = file_exists(public_path($favFile)) ? filemtime(public_path($favFile)) : time();
-    @endphp
-    <link rel="icon" type="image/png" href="{{ asset($favFile) }}?v={{ $favVer }}">
-    <link rel="shortcut icon" href="{{ asset($favFile) }}?v={{ $favVer }}">
-    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v={{ $favVer }}">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=cormorant-garamond:500,600,700|lora:400,500,600,700&display=swap" rel="stylesheet">
+
+    <title>@yield('title', 'ReadVerse - Thư viện Sách Điện Tử')</title>
+
+    <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('images/favicon-64.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/Icontab.png') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-
-<body class="flex min-h-full flex-col font-sans text-ink antialiased">
-    <div id="rv-top-loader" style="position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, #4B3828, #A98660, #2563eb); z-index: 9999; transition: width 0.2s ease, opacity 0.2s ease; opacity: 0; pointer-events: none;"></div>
+<body class="flex min-h-screen flex-col bg-cream font-sans text-ink antialiased selection:bg-beige selection:text-ink">
+    <div id="rv-top-loader" style="position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: #4B3828; z-index: 9999; transition: width 0.2s ease, opacity 0.2s ease; opacity: 0; pointer-events: none;"></div>
     <div id="rv-toast-container" style="position: fixed; top: 76px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; max-width: 380px; pointer-events: none;"></div>
 
     <div
@@ -60,80 +59,109 @@
         </div>
     </div>
 
-    <header id="rv-site-header" class="sticky top-0 z-40 w-full border-b border-sand bg-cream/95 backdrop-blur">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-8">
-                <a href="{{ route('home') }}" data-spa-nav="true" class="font-serif text-2xl font-semibold tracking-wide text-espresso">ReadVerse</a>
-                <nav id="rv-desktop-nav" class="hidden items-center gap-6 text-sm text-mocha md:flex">
-                    <a href="{{ route('home') }}" data-spa-nav="true" class="transition hover:text-espresso {{ request()->routeIs('home') && !request()->boolean('favorites') ? 'font-medium text-espresso' : '' }}">Trang chủ</a>
+    <header id="rv-site-header" class="sticky top-0 z-40 border-b border-sand bg-cream/95 backdrop-blur">
+        <div id="rv-desktop-nav" class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-5">
+                <a href="{{ route('home') }}" data-spa-nav="true" class="font-serif text-2xl font-bold tracking-tight text-espresso">
+                    ReadVerse
+                </a>
+
+                <nav class="flex flex-wrap items-center gap-1.5 text-xs font-medium text-mocha sm:gap-2">
+                    <a
+                        href="{{ route('home') }}"
+                        data-spa-nav="true"
+                        class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg px-3 transition {{ request()->routeIs('home') ? 'bg-sand font-semibold text-espresso' : 'text-mocha hover:bg-sand/60 hover:text-espresso' }}"
+                    >
+                        Trang chủ
+                    </a>
+
                     @auth
-                    <a href="{{ route('reader.library') }}" data-spa-nav="true" class="inline-flex items-center gap-1.5 transition hover:text-espresso {{ request()->routeIs('reader.library') ? 'font-semibold text-espresso' : '' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-espresso" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                        <span>Tủ sách & Lịch sử</span>
-                    </a>
-                    @if(auth()->user()->isAuthor() || auth()->user()->isAdmin())
-                    <a href="{{ route('author.ebooks.index') }}" data-spa-nav="true" class="transition hover:text-espresso {{ request()->routeIs('author.*') ? 'font-medium text-espresso' : '' }}">Cổng tác giả</a>
-                    @endif
-                    @if(auth()->user()->isAdmin())
-                    <a href="{{ route('admin.ebooks.index') }}" data-spa-nav="true" class="inline-flex items-center gap-1.5 rounded-lg bg-espresso/10 px-3 py-1 font-semibold text-espresso transition hover:bg-espresso hover:text-cream {{ request()->routeIs('admin.*') ? 'bg-espresso text-cream' : '' }}">
-                        <span>Quản trị Admin</span>
-                    </a>
-                    @endif
+                        <a
+                            href="{{ route('library.index') }}"
+                            data-spa-nav="true"
+                            class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg px-3 transition {{ request()->routeIs('library.*') || request()->routeIs('reader.library') ? 'bg-sand font-semibold text-espresso' : 'text-mocha hover:bg-sand/60 hover:text-espresso' }}"
+                        >
+                            Tủ sách & Lịch sử
+                        </a>
+
+                        @if(auth()->user()->isAuthor() || auth()->user()->isAdmin())
+                            <a
+                                href="{{ route('author.ebooks.index') }}"
+                                data-spa-nav="true"
+                                class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg px-3 transition {{ request()->routeIs('author.*') ? 'bg-sand font-semibold text-espresso' : 'text-mocha hover:bg-sand/60 hover:text-espresso' }}"
+                            >
+                                Cổng tác giả
+                            </a>
+                        @endif
+
+                        @if(auth()->user()->isAdmin())
+                            <a
+                                href="{{ route('admin.ebooks.pending') }}"
+                                data-spa-nav="true"
+                                class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg px-3 transition {{ request()->routeIs('admin.*') ? 'bg-sand font-semibold text-espresso' : 'text-mocha hover:bg-sand/60 hover:text-espresso' }}"
+                            >
+                                Quản trị Admin
+                            </a>
+                        @endif
                     @endauth
                 </nav>
             </div>
 
-            <div class="hidden items-center gap-4 text-sm md:flex">
+            <div class="flex flex-wrap items-center justify-end gap-2">
                 @auth
-                <div class="flex items-center gap-2">
-                    @if(auth()->user()->isAdmin())
-                    <span class="rounded-md bg-espresso px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-cream">Admin</span>
-                    @elseif(auth()->user()->isAuthor())
-                    <span class="rounded-md bg-mocha px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-cream">Author</span>
+                    @if(!auth()->user()->isAdmin())
+                        @php
+                            $navCartCount = \Illuminate\Support\Facades\Schema::hasTable('cart_items')
+                                ? \App\Models\CartItem::where('user_id', auth()->id())->count()
+                                : 0;
+                        @endphp
+                        <a
+                            href="{{ route('cart.index') }}"
+                            data-spa-nav="true"
+                            class="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-beige bg-white px-3 text-xs font-semibold text-espresso transition hover:bg-sand {{ request()->routeIs('cart.*') ? 'bg-sand' : '' }}"
+                        >
+                            <span>Giỏ hàng</span>
+                            <span id="nav-cart-count" class="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-espresso px-1 text-[10px] font-bold text-cream {{ $navCartCount > 0 ? '' : 'hidden' }}">{{ $navCartCount }}</span>
+                        </a>
+
+                        <a
+                            href="{{ route('profile.edit') }}"
+                            data-spa-nav="true"
+                            class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg border border-beige bg-white px-3 text-xs font-semibold text-espresso transition hover:bg-sand {{ request()->routeIs('profile.*') ? 'bg-sand' : '' }}"
+                        >
+                            <span>Hồ sơ</span>
+                        </a>
                     @endif
-                    <span class="font-medium text-mocha">{{ auth()->user()->name }}</span>
-                </div>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf
-                    <button type="submit" class="rounded-lg border border-beige px-4 py-1.5 font-medium text-espresso transition hover:bg-sand">Đăng xuất</button>
-                </form>
+
+                    <span class="inline-flex h-7 items-center justify-center whitespace-nowrap rounded-md bg-espresso px-2.5 text-[10px] font-bold uppercase tracking-wider text-cream">
+                        {{ auth()->user()->role }}
+                    </span>
+
+                    <span class="hidden text-xs font-semibold text-espresso sm:inline">
+                        {{ auth()->user()->name }}
+                    </span>
+
+                    <form method="POST" action="{{ route('logout') }}" class="inline-flex">
+                        @csrf
+                        <button type="submit" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg border border-beige bg-white px-3 text-xs font-semibold text-espresso transition hover:bg-sand">
+                            Đăng xuất
+                        </button>
+                    </form>
                 @else
-                <a href="{{ route('login') }}" class="text-mocha transition hover:text-espresso">Đăng nhập</a>
-                <a href="{{ route('register') }}" class="rounded-lg bg-espresso px-4 py-1.5 font-medium text-cream transition hover:bg-mocha">Đăng ký</a>
+                    <a
+                        href="{{ route('login') }}"
+                        class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg border border-beige bg-white px-3 text-xs font-semibold text-espresso transition hover:bg-sand"
+                    >
+                        Đăng nhập
+                    </a>
+                    <a
+                        href="{{ route('register') }}"
+                        class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg bg-espresso px-3.5 text-xs font-semibold text-cream shadow-sm transition hover:bg-mocha"
+                    >
+                        Đăng ký
+                    </a>
                 @endauth
             </div>
-
-            <details class="relative md:hidden">
-                <summary class="flex cursor-pointer list-none items-center rounded-lg p-2 text-espresso [&::-webkit-details-marker]:hidden">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
-                    </svg>
-                </summary>
-                <div class="absolute right-0 mt-3 w-60 rounded-xl border border-sand bg-cream p-2 text-sm shadow-lg">
-                    <a href="{{ route('home') }}" data-spa-nav="true" class="block rounded-lg px-3 py-2.5 text-espresso hover:bg-sand">Trang chủ</a>
-                    @auth
-                    <a href="{{ route('reader.library') }}" data-spa-nav="true" class="block rounded-lg px-3 py-2.5 font-medium text-espresso hover:bg-sand">Tủ sách & Lịch sử</a>
-                    @if(auth()->user()->isAuthor() || auth()->user()->isAdmin())
-                    <a href="{{ route('author.ebooks.index') }}" data-spa-nav="true" class="block rounded-lg px-3 py-2.5 text-espresso hover:bg-sand">Cổng tác giả</a>
-                    @endif
-                    @if(auth()->user()->isAdmin())
-                    <a href="{{ route('admin.ebooks.index') }}" data-spa-nav="true" class="block rounded-lg px-3 py-2.5 font-semibold text-espresso hover:bg-sand">Quản trị Admin</a>
-                    @endif
-                    <div class="my-2 border-t border-sand"></div>
-                    <p class="px-3 py-1.5 text-xs text-mocha">{{ auth()->user()->name }}</p>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="block w-full rounded-lg px-3 py-2.5 text-left text-espresso hover:bg-sand">Đăng xuất</button>
-                    </form>
-                    @else
-                    <div class="my-2 border-t border-sand"></div>
-                    <a href="{{ route('login') }}" class="block rounded-lg px-3 py-2.5 text-espresso hover:bg-sand">Đăng nhập</a>
-                    <a href="{{ route('register') }}" class="mt-1 block rounded-lg bg-espresso px-3 py-2.5 text-center font-medium text-cream hover:bg-mocha">Đăng ký</a>
-                    @endauth
-                </div>
-            </details>
         </div>
     </header>
 
@@ -141,15 +169,32 @@
         @include('layouts.partials.back-bar')
 
         @if(session('success'))
-        <div data-flash-type="success" data-flash-message="{{ session('success') }}" class="rv-flash-banner mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900 shadow-sm">{{ session('success') }}</div>
-        </div>
+            <div data-flash-type="success" data-flash-message="{{ session('success') }}" class="rv-flash-banner mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8">
+                <div class="rounded-2xl border border-beige bg-sand/70 px-5 py-3.5 text-xs font-semibold text-espresso shadow-sm">
+                    {{ session('success') }}
+                </div>
+            </div>
         @endif
 
         @if(session('error'))
-        <div data-flash-type="error" data-flash-message="{{ session('error') }}" class="rv-flash-banner mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-900 shadow-sm">{{ session('error') }}</div>
-        </div>
+            <div data-flash-type="error" data-flash-message="{{ session('error') }}" class="rv-flash-banner mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8">
+                <div class="rounded-2xl border border-mocha/40 bg-white px-5 py-3.5 text-xs font-semibold text-espresso shadow-sm">
+                    {{ session('error') }}
+                </div>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8">
+                <div class="rounded-2xl border border-mocha/40 bg-white px-5 py-3.5 text-xs text-espresso shadow-sm">
+                    <p class="font-semibold">Vui lòng kiểm tra lại thông tin:</p>
+                    <ul class="mt-1 list-disc space-y-0.5 pl-4 text-mocha">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
         @endif
 
         <main id="rv-main-view" class="flex-1">
@@ -157,14 +202,13 @@
         </main>
     </div>
 
-    <footer class="mt-auto border-t border-sand bg-sand/40 py-8">
-        <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 text-xs text-mocha sm:flex-row sm:px-6 lg:px-8">
-            <span class="font-serif text-lg font-semibold text-espresso">ReadVerse</span>
-            <span>&copy; {{ date('Y') }} ReadVerse</span>
+    <footer class="mt-16 border-t border-sand bg-cream py-8 text-center text-xs text-mocha">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <p class="font-serif text-base font-semibold text-espresso">ReadVerse — Nền tảng Thư viện & Đọc Sách Điện Tử Trực Tuyến</p>
+            <p class="mt-1 text-taupe">Đồ án học phần Lập trình Mã nguồn mở • Xây dựng trên Laravel Framework</p>
         </div>
     </footer>
 
     @stack('scripts')
 </body>
-
 </html>

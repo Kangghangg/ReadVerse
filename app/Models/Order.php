@@ -30,6 +30,6 @@ class Order extends Model
 
     public function ebook(): BelongsTo
     {
-        return $this->belongsTo(Ebook::class);
+        return $this->belongsTo(Ebook::class)->withTrashed();
     }
 }

@@ -1,144 +1,214 @@
 @extends('layouts.readverse')
 
-@section('title', 'Quản lý tất cả sách - ReadVerse Admin')
+@section('title', 'Quản trị hệ thống - Kho sách')
 
 @section('content')
-<div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
     @include('admin.partials.nav')
 
-    <div id="catalog-container">
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
-            <div class="rounded-2xl border border-beige bg-sand/40 p-4">
-                <p class="text-xs font-semibold uppercase text-mocha">Tổng số sách</p>
-                <p class="mt-1 font-serif text-3xl font-bold text-espresso">{{ $stats['total_ebooks'] ?? 0 }}</p>
-            </div>
-            <div class="rounded-2xl border border-beige bg-sand/40 p-4">
-                <p class="text-xs font-semibold uppercase text-mocha">Đã xuất bản</p>
-                <p class="mt-1 font-serif text-3xl font-bold text-emerald-700">{{ $stats['published_ebooks'] ?? 0 }}</p>
-            </div>
-            <div class="rounded-2xl border border-beige bg-sand/40 p-4">
-                <p class="text-xs font-semibold uppercase text-mocha">Chờ duyệt</p>
-                <p class="mt-1 font-serif text-3xl font-bold text-amber-700">{{ $stats['pending_ebooks'] ?? 0 }}</p>
-            </div>
-            <div class="rounded-2xl border border-beige bg-sand/40 p-4">
-                <p class="text-xs font-semibold uppercase text-mocha">Từ chối / Nháp</p>
-                <p class="mt-1 font-serif text-3xl font-bold text-rose-700">{{ $stats['draft_ebooks'] ?? 0 }}</p>
-            </div>
+    <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+            @if($status === 'trashed')
+                <h1 class="font-serif text-3xl font-bold text-espresso">Thùng rác ({{ $stats['trashed_ebooks'] ?? 0 }})</h1>
+                <p class="mt-0.5 text-xs text-mocha">Danh sách các tác phẩm đã tạm xóa khỏi thư viện. Bạn có thể khôi phục lại hoặc xóa vĩnh viễn.</p>
+            @else
+                <h1 class="font-serif text-3xl font-bold text-espresso">Quản lý Kho sách ({{ $stats['total_ebooks'] ?? 0 }})</h1>
+                <p class="mt-0.5 text-xs text-mocha">Quản lý thông tin, trạng thái xuất bản và nội dung các tác phẩm trên hệ thống</p>
+            @endif
         </div>
+        <div class="flex flex-wrap items-center gap-2.5">
+            @if($status === 'trashed')
+                <a href="{{ route('admin.ebooks.index') }}" class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-xl border border-beige bg-white px-4 text-xs font-semibold text-espresso shadow-sm transition hover:bg-sand">
+                    Quay về Kho sách
+                </a>
+            @else
+                <a href="{{ route('admin.ebooks.index', ['status' => 'trashed']) }}" class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-xl border border-beige bg-white px-4 text-xs font-semibold text-mocha shadow-sm transition hover:bg-sand hover:text-espresso">
+                    Thùng rác ({{ $stats['trashed_ebooks'] ?? 0 }})
+                </a>
+            @endif
+            <a href="{{ route('author.ebooks.create') }}" class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-xl bg-espresso px-4 text-xs font-semibold text-cream shadow-sm transition hover:bg-mocha">
+                Thêm sách mới
+            </a>
+        </div>
+    </div>
 
-        <form method="GET" action="{{ route('admin.ebooks.index') }}" data-ajax-catalog-form="true" class="mb-6 flex flex-col gap-3 rounded-2xl border border-beige bg-sand/50 p-4 lg:flex-row lg:items-center">
-            <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-12">
-                <div class="sm:col-span-5">
-                    <input type="text" name="search" value="{{ $search }}" data-ajax-search-input="true" autocomplete="off" placeholder="Tìm kiếm tên sách, tác giả, người đăng..." class="w-full rounded-xl border border-beige bg-cream px-4 py-2.5 text-sm text-espresso placeholder:text-taupe focus:border-espresso focus:outline-none focus:ring-1 focus:ring-espresso">
-                </div>
-                <div class="sm:col-span-4">
-                    <select name="category" class="w-full rounded-xl border border-beige bg-cream px-3.5 py-2.5 text-sm text-espresso focus:border-espresso focus:outline-none focus:ring-1 focus:ring-espresso">
-                        <option value="">Tất cả thể loại</option>
-                        @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}" {{ (int) $categoryId === (int) $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="sm:col-span-3">
-                    <select name="status" class="w-full rounded-xl border border-beige bg-cream px-3.5 py-2.5 text-sm text-espresso focus:border-espresso focus:outline-none focus:ring-1 focus:ring-espresso">
-                        <option value="">Mọi trạng thái</option>
-                        <option value="published" {{ $status === 'published' ? 'selected' : '' }}>Đã xuất bản</option>
-                        <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
-                        <option value="draft" {{ $status === 'draft' ? 'selected' : '' }}>Từ chối / Bản nháp</option>
-                    </select>
-                </div>
-            </div>
+    <div class="mt-5 flex flex-wrap items-center gap-2">
+        <a href="{{ route('admin.ebooks.index') }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-xl px-3.5 text-xs font-semibold transition {{ empty($status) ? 'bg-espresso text-cream shadow-sm' : 'border border-beige bg-white text-espresso hover:bg-sand' }}">
+            Tất cả ({{ $stats['total_ebooks'] ?? 0 }})
+        </a>
+        <a href="{{ route('admin.ebooks.index', ['status' => 'published']) }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-xl px-3.5 text-xs font-semibold transition {{ $status === 'published' ? 'bg-espresso text-cream shadow-sm' : 'border border-beige bg-white text-espresso hover:bg-sand' }}">
+            Đã xuất bản ({{ $stats['published_ebooks'] ?? 0 }})
+        </a>
+        <a href="{{ route('admin.ebooks.index', ['status' => 'pending']) }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-xl px-3.5 text-xs font-semibold transition {{ $status === 'pending' ? 'bg-espresso text-cream shadow-sm' : 'border border-beige bg-white text-espresso hover:bg-sand' }}">
+            Chờ duyệt ({{ $stats['pending_ebooks'] ?? 0 }})
+        </a>
+        <a href="{{ route('admin.ebooks.index', ['status' => 'draft']) }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-xl px-3.5 text-xs font-semibold transition {{ $status === 'draft' ? 'bg-espresso text-cream shadow-sm' : 'border border-beige bg-white text-espresso hover:bg-sand' }}">
+            Từ chối / Bản nháp ({{ $stats['draft_ebooks'] ?? 0 }})
+        </a>
+        <a href="{{ route('admin.ebooks.index', ['status' => 'trashed']) }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-xl px-3.5 text-xs font-semibold transition {{ $status === 'trashed' ? 'bg-mocha text-cream shadow-sm' : 'border border-beige bg-white text-mocha hover:bg-sand hover:text-espresso' }}">
+            Thùng rác ({{ $stats['trashed_ebooks'] ?? 0 }})
+        </a>
+    </div>
 
-            <div class="flex items-center justify-end lg:shrink-0">
-                <button
-                    type="button"
-                    data-reset-catalog-filter="true"
-                    data-reset-url="{{ route('admin.ebooks.index') }}"
-                    title="Khôi phục bộ lọc về mặc định"
-                    aria-label="Khôi phục bộ lọc về mặc định"
-                    style="border-radius: 9999px;"
-                    class="group inline-flex h-10 w-10 shrink-0 items-center justify-center bg-espresso text-cream shadow-sm transition hover:bg-mocha focus:outline-none focus:ring-2 focus:ring-mocha/40"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-300 group-hover:-rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </button>
-            </div>
-        </form>
+    <form method="GET" action="{{ route('admin.ebooks.index') }}" class="mt-4 grid grid-cols-1 gap-3 rounded-2xl border border-beige bg-white p-4 shadow-sm sm:grid-cols-4">
+        <input type="text" name="search" value="{{ $search }}" placeholder="Tìm theo tên sách, tác giả..." class="h-9 rounded-xl border border-beige bg-cream px-3.5 text-xs text-ink placeholder:text-taupe">
+        <select name="category" class="h-9 rounded-xl border border-beige bg-cream px-3.5 text-xs font-medium text-espresso">
+            <option value="">Tất cả thể loại</option>
+            @foreach($categories as $cat)
+                <option value="{{ $cat->id }}" @selected((int) $categoryId === (int) $cat->id)>{{ $cat->name }}</option>
+            @endforeach
+        </select>
+        <select name="status" class="h-9 rounded-xl border border-beige bg-cream px-3.5 text-xs font-medium text-espresso">
+            <option value="">Tất cả trạng thái</option>
+            <option value="published" @selected($status === 'published')>Đã xuất bản ({{ $stats['published_ebooks'] ?? 0 }})</option>
+            <option value="pending" @selected($status === 'pending')>Chờ duyệt ({{ $stats['pending_ebooks'] ?? 0 }})</option>
+            <option value="draft" @selected($status === 'draft')>Từ chối / Bản nháp ({{ $stats['draft_ebooks'] ?? 0 }})</option>
+            <option value="trashed" @selected($status === 'trashed')>Thùng rác ({{ $stats['trashed_ebooks'] ?? 0 }})</option>
+        </select>
+        <div class="flex gap-2">
+            <button type="submit" class="inline-flex h-9 flex-1 items-center justify-center rounded-xl bg-espresso px-4 text-xs font-semibold text-cream transition hover:bg-mocha">Lọc dữ liệu</button>
+            <a href="{{ route('admin.ebooks.index') }}" class="inline-flex h-9 items-center justify-center rounded-xl border border-beige bg-cream px-3.5 text-xs font-semibold text-espresso transition hover:bg-sand">Đặt lại</a>
+        </div>
+    </form>
 
-        <div id="catalog-grid-wrapper" class="rounded-2xl border border-beige bg-white shadow-sm transition-opacity duration-150">
+    <div class="mt-6 overflow-hidden rounded-2xl border border-beige bg-white shadow-sm">
+        <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-sand text-left text-sm">
-                <thead class="bg-sand/50 text-xs font-semibold uppercase text-mocha">
+                <thead class="bg-sand/50 text-xs font-semibold uppercase tracking-wider text-mocha">
                     <tr>
-                        <th class="px-5 py-4">Tác phẩm</th>
-                        <th class="px-5 py-4">Tác giả / Thể loại</th>
-                        <th class="px-5 py-4">Giá & Lượt xem</th>
-                        <th class="px-5 py-4">Trạng thái</th>
-                        <th class="px-5 py-4 text-right">Hành động</th>
+                        <th class="px-5 py-3.5">Tác phẩm</th>
+                        <th class="px-5 py-3.5">Thể loại & Tác giả</th>
+                        <th class="px-5 py-3.5">Giá & Lượt xem</th>
+                        <th class="px-5 py-3.5">Trạng thái</th>
+                        <th class="px-5 py-3.5 text-right">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-sand">
                     @forelse($ebooks as $ebook)
-                    <tr>
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-3">
-                                <img src="{{ $ebook->cover_url }}" alt="{{ $ebook->title }}" class="h-14 w-10 rounded object-cover shadow-sm">
-                                <div>
-                                    <a href="{{ route('ebooks.show', $ebook->slug) }}" data-spa-nav="true" class="font-semibold text-espresso hover:underline">{{ $ebook->title }}</a>
-                                    <p class="text-xs text-mocha">Người đăng: {{ $ebook->uploader?->name ?? 'Hệ thống' }}</p>
+                        <tr>
+                            <td class="px-5 py-4 align-middle">
+                                <div class="flex items-center gap-3.5">
+                                    <img src="{{ $ebook->cover_url }}" alt="{{ $ebook->title }}" class="h-14 w-10 shrink-0 rounded-lg border border-beige/60 object-cover shadow-sm">
+                                    <div class="min-w-0">
+                                        @if($ebook->trashed())
+                                            <p class="font-serif text-base font-bold text-mocha line-through">{{ $ebook->title }}</p>
+                                            <p class="mt-0.5 text-[11px] text-taupe">Đã chuyển vào thùng rác {{ $ebook->deleted_at?->diffForHumans() }}</p>
+                                        @else
+                                            <a href="{{ route('ebooks.show', $ebook->slug) }}" class="block font-serif text-base font-bold text-espresso transition hover:text-mocha">{{ $ebook->title }}</a>
+                                        @endif
+                                        <p class="mt-0.5 text-xs text-taupe">Người đăng: {{ $ebook->uploader?->name ?? 'Hệ thống' }} • {{ $ebook->pages }} trang</p>
+                                        @if($ebook->status === 'draft' && $ebook->rejection_reason)
+                                            <p class="mt-1 text-[11px] font-medium text-mocha">Phản hồi: {{ $ebook->rejection_reason }}</p>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="px-5 py-4">
-                            <p class="font-medium text-espresso">{{ $ebook->author?->name }}</p>
-                            <p class="text-xs text-mocha">{{ $ebook->category?->name }}</p>
-                        </td>
-                        <td class="px-5 py-4">
-                            <p class="font-semibold text-espresso">{{ $ebook->price > 0 ? number_format($ebook->price) . ' đ' : 'Miễn phí' }}</p>
-                            <p class="text-xs text-mocha">{{ $ebook->view_count }} lượt đọc • {{ $ebook->reviews_count ?? 0 }} đánh giá</p>
-                        </td>
-                        <td class="px-5 py-4">
-                            @if($ebook->status === 'published')
-                                <span class="rounded-md bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">Đã xuất bản</span>
-                            @elseif($ebook->status === 'pending')
-                                <span class="rounded-md bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">Chờ duyệt</span>
-                            @else
-                                <span class="rounded-md bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-800">Từ chối / Nháp</span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-4 text-right space-x-1">
-                            @if($ebook->status !== 'published')
-                            <form action="{{ route('admin.ebooks.approve', $ebook->id) }}" method="POST" data-ajax-mutation-form="true" class="inline">
-                                @csrf
-                                <button type="submit" class="rounded-lg bg-emerald-700 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600">Duyệt</button>
-                            </form>
-                            @endif
-                            @if($ebook->status !== 'draft')
-                            <form action="{{ route('admin.ebooks.reject', $ebook->id) }}" method="POST" data-ajax-mutation-form="true" data-confirm-title="Gỡ / Từ chối xuất bản" data-confirm="Bạn có chắc chắn muốn gỡ hoặc từ chối phát hành cuốn sách &laquo;{{ $ebook->title }}&raquo; không?" data-confirm-btn="Xác nhận gỡ" class="inline">
-                                @csrf
-                                <button type="submit" class="rounded-lg bg-amber-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-amber-500">Gỡ / Từ chối</button>
-                            </form>
-                            @endif
-                            <a href="{{ route('author.ebooks.edit', $ebook->id) }}" data-spa-nav="true" class="inline-block rounded-lg border border-beige bg-cream px-2.5 py-1.5 text-xs font-semibold text-espresso hover:bg-sand">Sửa</a>
-                            <form action="{{ route('admin.ebooks.destroy', $ebook->id) }}" method="POST" data-ajax-mutation-form="true" data-confirm-title="Xóa vĩnh viễn sách" data-confirm="Bạn có chắc chắn muốn xóa vĩnh viễn cuốn sách &laquo;{{ $ebook->title }}&raquo; khỏi hệ thống? Thao tác này không thể hoàn tác." data-confirm-btn="Xóa vĩnh viễn" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="rounded-lg bg-rose-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-rose-500">Xóa</button>
-                            </form>
-                        </td>
-                    </tr>
+                            </td>
+                            <td class="px-5 py-4 align-middle">
+                                <span class="inline-flex items-center whitespace-nowrap rounded-lg border border-beige/80 bg-sand/60 px-2.5 py-1 text-xs font-semibold text-espresso">
+                                    {{ $ebook->category?->name }}
+                                </span>
+                                <p class="mt-1.5 text-xs text-mocha">{{ $ebook->author?->name }}</p>
+                            </td>
+                            <td class="px-5 py-4 align-middle whitespace-nowrap">
+                                <p class="font-semibold text-espresso">{{ $ebook->price > 0 ? number_format($ebook->price) . ' đ' : 'Miễn phí' }}</p>
+                                <p class="mt-0.5 text-xs text-mocha">{{ $ebook->view_count }} lượt đọc • {{ $ebook->reviews_count ?? 0 }} đánh giá</p>
+                            </td>
+                            <td class="px-5 py-4 align-middle whitespace-nowrap">
+                                @if($ebook->trashed())
+                                    <span class="inline-flex items-center whitespace-nowrap rounded-lg border border-beige bg-cream px-3 py-1 text-xs font-semibold text-taupe">
+                                        Đã xóa
+                                    </span>
+                                @elseif($ebook->status === 'published')
+                                    <span class="inline-flex items-center whitespace-nowrap rounded-lg border border-espresso/20 bg-sand px-3 py-1 text-xs font-semibold text-espresso">
+                                        Đã xuất bản
+                                    </span>
+                                @elseif($ebook->status === 'pending')
+                                    <span class="inline-flex items-center whitespace-nowrap rounded-lg border border-mocha/30 bg-cream px-3 py-1 text-xs font-semibold text-mocha">
+                                        Chờ duyệt
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center whitespace-nowrap rounded-lg border border-beige bg-white px-3 py-1 text-xs font-semibold text-taupe">
+                                        Từ chối
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 align-middle text-right whitespace-nowrap">
+                                <div class="inline-flex items-center justify-end gap-2 whitespace-nowrap">
+                                    @if($ebook->trashed())
+                                        <form action="{{ route('admin.ebooks.restore', $ebook->id) }}" method="POST" class="inline-flex">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg bg-espresso px-3 text-xs font-semibold text-cream shadow-sm transition hover:bg-mocha">
+                                                Khôi phục
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('admin.ebooks.force_destroy', $ebook->id) }}" method="POST" class="inline-flex" data-confirm-title="Xóa vĩnh viễn tác phẩm" data-confirm="Tác phẩm sẽ bị xóa vĩnh viễn khỏi hệ thống và không thể khôi phục. Bạn có chắc chắn không?" data-confirm-btn="Xóa vĩnh viễn">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg border border-beige bg-white px-3 text-xs font-semibold text-mocha transition hover:border-espresso hover:bg-espresso hover:text-cream">
+                                                Xóa vĩnh viễn
+                                            </button>
+                                        </form>
+                                    @else
+                                        @if($ebook->status !== 'published')
+                                            <form action="{{ route('admin.ebooks.approve', $ebook->id) }}" method="POST" class="inline-flex">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg bg-espresso px-3 text-xs font-semibold text-cream shadow-sm transition hover:bg-mocha">
+                                                    Duyệt
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        @if($ebook->status === 'pending')
+                                            <button
+                                                type="button"
+                                                onclick="window.rvOpenRejectModal(this)"
+                                                data-open-reject-modal="true"
+                                                data-reject-action="{{ route('admin.ebooks.reject', $ebook->id) }}"
+                                                data-ebook-title="{{ $ebook->title }}"
+                                                data-author-name="{{ $ebook->uploader?->name ?? $ebook->author?->name ?? 'Tác giả' }}"
+                                                class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg border border-beige bg-cream px-3 text-xs font-semibold text-espresso transition hover:bg-sand"
+                                            >
+                                                Từ chối
+                                            </button>
+                                        @endif
+
+                                        <a href="{{ route('author.ebooks.edit', $ebook->id) }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg border border-beige bg-sand/50 px-3 text-xs font-semibold text-espresso transition hover:bg-sand">
+                                            Sửa
+                                        </a>
+
+                                        <form action="{{ route('admin.ebooks.destroy', $ebook->id) }}" method="POST" class="inline-flex" data-confirm-title="Xóa tác phẩm" data-confirm="Bạn có chắc chắn muốn xóa tác phẩm này không?" data-confirm-btn="Xóa">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg border border-beige bg-white px-3 text-xs font-semibold text-mocha transition hover:border-espresso hover:bg-espresso hover:text-cream">
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="5" class="px-6 py-10 text-center text-mocha">Không tìm thấy sách nào khớp với bộ lọc.</td>
-                    </tr>
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-sm text-mocha">
+                                @if($status === 'trashed')
+                                    Thùng rác hiện đang trống.
+                                @else
+                                    Không tìm thấy tác phẩm nào phù hợp.
+                                @endif
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-
-        <div id="catalog-pagination" class="mt-6">
-            {{ $ebooks->links('vendor.pagination.readverse') }}
-        </div>
     </div>
+
+    <div class="mt-6">
+        {{ $ebooks->links('vendor.pagination.readverse') }}
+    </div>
+
+    @include('admin.partials.reject-modal')
 </div>
 @endsection

@@ -13,29 +13,29 @@
                 type="button"
                 @click="tab = 'reading'"
                 :class="tab === 'reading' ? 'bg-espresso text-cream shadow-sm' : 'border border-beige bg-sand/40 text-espresso hover:bg-sand'"
-                class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
+                class="inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-xl px-4 text-xs font-semibold transition"
             >
-                <span>1. Sách đang đọc</span>
+                <span>Sách đang đọc</span>
                 <span class="rounded-md bg-white/20 px-1.5 py-0.5 text-[10px]">{{ count($readingHistories) }}</span>
             </button>
 
             <button
                 type="button"
                 @click="tab = 'favorites'"
-                :class="tab === 'favorites' ? 'bg-rose-600 text-cream shadow-sm' : 'border border-rose-300 bg-rose-50/60 text-rose-700 hover:bg-rose-100/70'"
-                class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
+                :class="tab === 'favorites' ? 'bg-espresso text-cream shadow-sm' : 'border border-beige bg-sand/40 text-espresso hover:bg-sand'"
+                class="inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-xl px-4 text-xs font-semibold transition"
             >
-                <span>2. Sách yêu thích</span>
-                <span class="rounded-md bg-black/10 px-1.5 py-0.5 text-[10px]">{{ count($favoriteEbooks) }}</span>
+                <span>Sách yêu thích</span>
+                <span class="rounded-md bg-white/20 px-1.5 py-0.5 text-[10px]">{{ count($favoriteEbooks) }}</span>
             </button>
 
             <button
                 type="button"
                 @click="tab = 'my_books'"
                 :class="tab === 'my_books' ? 'bg-espresso text-cream shadow-sm' : 'border border-beige bg-sand/40 text-espresso hover:bg-sand'"
-                class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
+                class="inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-xl px-4 text-xs font-semibold transition"
             >
-                <span>3. Sách của tôi</span>
+                <span>Sách của tôi</span>
                 <span class="rounded-md bg-white/20 px-1.5 py-0.5 text-[10px]">{{ count($myBooks) }}</span>
             </button>
         </div>
@@ -69,7 +69,7 @@
 
                     <div class="mt-auto pt-3 flex items-center justify-between">
                         <span class="text-[11px] text-taupe">Cập nhật {{ $item->updated_at->diffForHumans() }}</span>
-                        <a href="{{ route('ebooks.read', ['slug' => $item->ebook->slug, 'page' => $item->last_page]) }}" class="inline-flex items-center gap-1 rounded-lg bg-espresso px-3.5 py-1.5 text-xs font-semibold text-cream transition hover:bg-mocha">
+                        <a href="{{ route('ebooks.read', ['slug' => $item->ebook->slug, 'page' => $item->last_page]) }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg bg-espresso px-3.5 text-xs font-semibold text-cream transition hover:bg-mocha">
                             <span>Đọc tiếp (Tr. {{ $item->last_page }})</span>
                         </a>
                     </div>
@@ -80,7 +80,7 @@
         </div>
         @else
         <div class="rounded-2xl border border-beige bg-sand/30 py-16 text-center text-sm text-mocha">
-            Bạn chưa có lịch sử đọc sách nào. Hãy chọn một cuốn sách bất kỳ và bắt đầu đọc nhé!
+            Bạn chưa có lịch sử đọc sách nào.
         </div>
         @endif
     </div>
@@ -103,7 +103,7 @@
                         <span class="text-sm font-semibold text-espresso">{{ $ebook->price > 0 ? number_format($ebook->price) . ' đ' : 'Miễn phí' }}</span>
                         <div class="flex items-center gap-1.5">
                             <x-bookmark-button :ebook="$ebook" />
-                            <a href="{{ route('ebooks.read', $ebook->slug) }}" class="inline-flex h-8 items-center justify-center rounded-lg border border-espresso px-3.5 text-xs font-medium leading-none text-espresso transition hover:bg-espresso hover:text-cream">Đọc</a>
+                            <a href="{{ route('ebooks.read', $ebook->slug) }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg border border-espresso px-3.5 text-xs font-medium leading-none text-espresso transition hover:bg-espresso hover:text-cream">Đọc</a>
                         </div>
                     </div>
                 </div>
@@ -133,8 +133,8 @@
                     </h3>
                     <p class="mt-0.5 text-xs text-mocha">{{ $ebook->author?->name }}</p>
                     <div class="mt-auto flex items-center justify-between pt-3">
-                        <span class="text-xs font-semibold text-emerald-700">Đã mở khóa</span>
-                        <a href="{{ route('ebooks.read', $ebook->slug) }}" class="inline-flex h-8 items-center justify-center rounded-lg bg-espresso px-3.5 text-xs font-medium leading-none text-cream transition hover:bg-mocha">Đọc ngay</a>
+                        <span class="text-xs font-semibold text-mocha">Đã mở khóa</span>
+                        <a href="{{ route('ebooks.read', $ebook->slug) }}" class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg bg-espresso px-3.5 text-xs font-medium leading-none text-cream transition hover:bg-mocha">Đọc ngay</a>
                     </div>
                 </div>
             </article>

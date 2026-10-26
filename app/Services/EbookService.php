@@ -211,6 +211,13 @@ class EbookService
             'author_id' => $resolvedAuthorId,
         ];
 
+        if ($ebook->status === 'draft' && auth()->check() && !auth()->user()->isAdmin()) {
+            $payload['status'] = 'pending';
+            $payload['rejection_reason'] = null;
+            $payload['rejection_note'] = null;
+            $payload['rejected_at'] = null;
+        }
+
         if (!empty($validated['pre_uploaded_cover']) && Storage::disk('public')->exists($validated['pre_uploaded_cover'])) {
             if ($ebook->cover_image && !str_starts_with($ebook->cover_image, 'http')) {
                 Storage::disk('public')->delete($ebook->cover_image);
@@ -256,6 +263,19 @@ class EbookService
     public function deleteEbook(int $id): bool
     {
         $ebook = $this->ebookRepository->findById($id);
+        return $this->ebookRepository->delete($ebook);
+    }
+
+    public function restoreEbook(int $id): Ebook
+    {
+        $ebook = Ebook::onlyTrashed()->findOrFail($id);
+        $ebook->restore();
+        return $ebook;
+    }
+
+    public function forceDeleteEbook(int $id): bool
+    {
+        $ebook = Ebook::withTrashed()->findOrFail($id);
 
         if ($ebook->cover_image && !str_starts_with($ebook->cover_image, 'http')) {
             Storage::disk('public')->delete($ebook->cover_image);
@@ -265,19 +285,29 @@ class EbookService
             Storage::disk('public')->delete($ebook->file_path);
         }
 
-        return $this->ebookRepository->delete($ebook);
+        return (bool) $ebook->forceDelete();
     }
 
     public function approveEbook(int $id): Ebook
     {
         $ebook = $this->ebookRepository->findById($id);
-        return $this->ebookRepository->update($ebook, ['status' => 'published']);
+        return $this->ebookRepository->update($ebook, [
+            'status' => 'published',
+            'rejection_reason' => null,
+            'rejection_note' => null,
+            'rejected_at' => null,
+        ]);
     }
 
-    public function rejectEbook(int $id): Ebook
+    public function rejectEbook(int $id, ?string $reason = null, ?string $note = null): Ebook
     {
         $ebook = $this->ebookRepository->findById($id);
-        return $this->ebookRepository->update($ebook, ['status' => 'draft']);
+        return $this->ebookRepository->update($ebook, [
+            'status' => 'draft',
+            'rejection_reason' => $reason ?: 'Chưa đạt tiêu chuẩn xuất bản',
+            'rejection_note' => $note ?: 'Vui lòng kiểm tra và chỉnh sửa lại nội dung bản thảo trước khi gửi duyệt lại.',
+            'rejected_at' => now(),
+        ]);
     }
 
     public function toggleBookmark(User $user, int $ebookId): bool

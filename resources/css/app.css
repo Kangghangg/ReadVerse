@@ -219,3 +219,11 @@
         animation: rvAppleFadeIn 350ms var(--apple-ease-out) both;
     }
 }
+
+/* rv-dropdown-overflow-fix: dropdown đang mở không bị khung bo góc cắt mất */
+.overflow-hidden:has(.rv-popover-open),
+.overflow-x-auto:has(.rv-popover-open),
+.overflow-y-auto:has(.rv-popover-open),
+#catalog-grid-wrapper:has(.rv-popover-open) {
+    overflow: visible !important;
+}

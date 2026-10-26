@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Schema;
 
 class Ebook extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -23,6 +24,9 @@ class Ebook extends Model
         'pages',
         'view_count',
         'status',
+        'rejection_reason',
+        'rejection_note',
+        'rejected_at',
         'category_id',
         'author_id',
         'user_id',
@@ -32,6 +36,8 @@ class Ebook extends Model
         'price' => 'decimal:2',
         'pages' => 'integer',
         'view_count' => 'integer',
+        'rejected_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     public function getCoverUrlAttribute(): string
@@ -83,6 +89,17 @@ class Ebook extends Model
         return false;
     }
 
+    public function isInCartOf(?User $user): bool
+    {
+        if (!$user || !Schema::hasTable('cart_items')) {
+            return false;
+        }
+
+        return CartItem::where('user_id', $user->id)
+            ->where('ebook_id', $this->id)
+            ->exists();
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -106,6 +123,11 @@ class Ebook extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
     }
 
     public function bookmarkedByUsers(): BelongsToMany

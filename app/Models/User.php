@@ -35,6 +35,19 @@ class User extends Authenticatable
         ];
     }
 
+    public function getAvatarUrlAttribute(): string
+    {
+        if (!$this->avatar) {
+            return 'https://ui-avatars.com/api/?background=4B3828&color=F8F3EA&bold=true&name=' . urlencode($this->name);
+        }
+
+        if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+            return $this->avatar;
+        }
+
+        return asset('storage/' . ltrim($this->avatar, '/'));
+    }
+
     public function profile(): HasOne
     {
         return $this->hasOne(Profile::class);
@@ -58,6 +71,16 @@ class User extends Authenticatable
     public function unlockedEbooks(): BelongsToMany
     {
         return $this->belongsToMany(Ebook::class, 'unlocked_ebooks')->withTimestamps();
+    }
+
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function cartEbooks(): BelongsToMany
+    {
+        return $this->belongsToMany(Ebook::class, 'cart_items')->withTimestamps();
     }
 
     public function orders(): HasMany

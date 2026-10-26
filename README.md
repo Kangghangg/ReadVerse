@@ -1,58 +1,30 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📚 ReadVerse — Nền tảng Thư viện & Đọc Sách Điện Tử Trực Tuyến (Laravel Framework)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Đồ án cuối môn học **Lập trình Mã nguồn mở** — Khoa Công nghệ Thông tin, Trường Đại học Công Thương TP.HCM (HUIT).
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Công nghệ & Kiến trúc Kỹ thuật
+- **Backend**: Laravel Framework, kiến trúc `Service - Repository Pattern`, bảo mật với `Policy`, `Form Request Validation` (thông báo lỗi tiếng Việt) và `Role-based Middleware`.
+- **Cơ sở dữ liệu**: Hỗ trợ đầy đủ **MySQL** (`database/readverse_mysql.sql` + hệ thống 15 tệp Migration/Seeder) và **SQLite**.
+- **Các tính năng Mở rộng (Điểm cộng Mục 5)**:
+  1. **Xóa mềm & Thùng rác khôi phục (`SoftDeletes`)**: Lưu trữ an toàn sách đã xóa trong Thùng rác Admin, cho phép Khôi phục hoặc Xóa vĩnh viễn mà không làm hỏng lịch sử đơn hàng.
+  2. **Tích hợp REST API bên ngoài (`OpenLibrary` & `Google Books API`)**: Tự động tra cứu thông tin sách theo tên/ISBN, điền Tiêu đề, Tác giả, Mô tả, Số trang và tải Ảnh bìa trực tiếp vào biểu mẫu.
+  3. **Quản lý Đơn hàng, Biểu đồ Doanh thu (`Chart.js`) & Xuất báo cáo Excel/CSV**: Thống kê trực quan dòng tiền theo ngày/thể loại và xuất báo cáo `.csv` chuẩn UTF-8 BOM.
+  4. **Giỏ hàng (`Shopping Cart`) & Thanh toán gộp qua VietQR**, **Pop-up Phản hồi Kiểm duyệt Bản thảo**, và **Trình đọc sách lật trang 3D (`PDF.js` + `StPageFlip`)**.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+## 2. Hướng dẫn Cài đặt & Chạy Dự án
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+php -r "file_exists('.env') || copy('.env.example', '.env');"
+php artisan key:generate
+php artisan migrate --force
+php artisan storage:link
+php artisan optimize:clear
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Truy cập ứng dụng tại: `http://127.0.0.1:8000`
+- Tệp CSDL MySQL đính kèm sẵn tại: `database/readverse_mysql.sql`

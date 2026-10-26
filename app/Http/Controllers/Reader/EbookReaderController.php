@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reader;
 
 use App\Http\Controllers\Controller;
+use App\Models\CartItem;
 use App\Models\Ebook;
 use App\Models\Order;
 use App\Models\Review;
@@ -25,10 +26,18 @@ class EbookReaderController extends Controller
         $user = auth()->user();
 
         if (!$ebook->isUnlockedBy($user)) {
+            if ($user) {
+                CartItem::firstOrCreate([
+                    'user_id' => $user->id,
+                    'ebook_id' => $ebook->id,
+                ]);
+                return redirect()
+                    ->route('cart.index')
+                    ->with('success', 'Đã thêm "' . $ebook->title . '" vào giỏ hàng. Vui lòng hoàn tất thanh toán để đọc trọn vẹn tác phẩm.');
+            }
             return redirect()
                 ->route('ebooks.show', $ebook->slug)
-                ->with('error', 'Bạn cần mua sách để mở khóa nội dung đọc')
-                ->with('open_checkout_modal', true);
+                ->with('error', 'Vui lòng đăng nhập và thêm sách vào giỏ hàng để mở khóa nội dung đọc.');
         }
 
         $ebook->increment('view_count');

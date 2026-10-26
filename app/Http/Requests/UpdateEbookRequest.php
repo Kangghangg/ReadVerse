@@ -34,4 +34,14 @@ class UpdateEbookRequest extends FormRequest
             'file_path' => ['nullable', 'file', 'max:204800'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Vui lòng nhập tiêu đề sách.',
+            'description.required' => 'Vui lòng nhập mô tả nội dung sách.',
+            'description.min' => 'Mô tả sách cần tối thiểu 5 ký tự.',
+            'category_id.required' => 'Vui lòng chọn danh mục thể loại sách.',
+        ];
+    }
 }
