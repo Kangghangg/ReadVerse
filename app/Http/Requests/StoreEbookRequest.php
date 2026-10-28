@@ -23,7 +23,7 @@ class StoreEbookRequest extends FormRequest
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'author_id' => ['nullable', 'integer', 'exists:authors,id'],
             'pre_uploaded_file' => ['nullable', 'string', 'max:500'],
-            'pre_uploaded_cover' => ['nullable', 'string', 'max:500'],
+            'pre_uploaded_cover' => ['nullable', 'string', 'max:500', 'regex:#^ebooks/covers/[A-Za-z0-9_.\-]+$#'],
             'cover_image' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,svg', 'max:20480'],
             'file_path' => [
                 'required_without:pre_uploaded_file',

@@ -209,6 +209,12 @@
         </div>
     </footer>
 
+    @auth
+        @if(auth()->user()->isAuthor() || auth()->user()->isAdmin())
+            <script src="{{ asset('js/readverse-book-lookup.js') }}?v={{ filemtime(public_path('js/readverse-book-lookup.js')) }}" defer></script>
+        @endif
+    @endauth
+
     @stack('scripts')
 </body>
 </html>

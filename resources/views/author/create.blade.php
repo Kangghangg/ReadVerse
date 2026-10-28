@@ -42,7 +42,7 @@
             <button
                 type="button"
                 id="api-lookup-btn"
-                onclick="window.rvLookupExternalBookApi()"
+                data-api-lookup="true"
                 class="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-xl bg-espresso px-5 text-xs font-semibold text-cream shadow-sm transition hover:bg-mocha"
             >
                 Tìm kiếm & Điền tự động
@@ -51,11 +51,11 @@
 
         <div class="mt-3 flex flex-wrap items-center gap-1.5 text-[11px]">
             <span class="font-semibold text-mocha">Gợi ý tra cứu:</span>
-            <button type="button" onclick="window.rvQuickApiSearch('Clean Code Robert Martin')" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-medium text-espresso transition hover:bg-sand">Clean Code</button>
-            <button type="button" onclick="window.rvQuickApiSearch('The Pragmatic Programmer')" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-medium text-espresso transition hover:bg-sand">The Pragmatic Programmer</button>
-            <button type="button" onclick="window.rvQuickApiSearch('Atomic Habits James Clear')" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-medium text-espresso transition hover:bg-sand">Atomic Habits</button>
-            <button type="button" onclick="window.rvQuickApiSearch('Design Patterns Erich Gamma')" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-medium text-espresso transition hover:bg-sand">Design Patterns</button>
-            <button type="button" onclick="window.rvQuickApiSearch('9780132350884')" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-mono font-medium text-espresso transition hover:bg-sand">ISBN: 9780132350884</button>
+            <button type="button" data-api-quick="Clean Code Robert Martin" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-medium text-espresso transition hover:bg-sand">Clean Code</button>
+            <button type="button" data-api-quick="The Pragmatic Programmer" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-medium text-espresso transition hover:bg-sand">The Pragmatic Programmer</button>
+            <button type="button" data-api-quick="Atomic Habits James Clear" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-medium text-espresso transition hover:bg-sand">Atomic Habits</button>
+            <button type="button" data-api-quick="Design Patterns Erich Gamma" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-medium text-espresso transition hover:bg-sand">Design Patterns</button>
+            <button type="button" data-api-quick="9780132350884" class="rounded-lg border border-beige bg-cream/50 px-2.5 py-1 font-mono font-medium text-espresso transition hover:bg-sand">ISBN: 9780132350884</button>
         </div>
 
         <div id="api-lookup-status" class="mt-3 hidden rounded-xl border border-beige bg-cream/60 px-4 py-2.5 text-xs font-semibold text-espresso"></div>
@@ -222,168 +222,4 @@
         </div>
     </form>
 </div>
-
-<script>
-window.__rvApiResultsCache = [];
-
-window.rvQuickApiSearch = function(keyword) {
-    var input = document.getElementById('api-book-query');
-    if (input) {
-        input.value = keyword;
-        window.rvLookupExternalBookApi();
-    }
-};
-
-window.rvLookupExternalBookApi = function() {
-    var input = document.getElementById('api-book-query');
-    var statusEl = document.getElementById('api-lookup-status');
-    var resultsEl = document.getElementById('api-lookup-results');
-    var btn = document.getElementById('api-lookup-btn');
-
-    var q = input ? input.value.trim() : '';
-    if (!q) {
-        if (statusEl) {
-            statusEl.textContent = 'Vui lòng nhập tên sách hoặc mã ISBN trước khi tìm kiếm.';
-            statusEl.classList.remove('hidden');
-        }
-        return;
-    }
-
-    if (btn) btn.disabled = true;
-    if (statusEl) {
-        statusEl.textContent = 'Đang truy vấn dữ liệu sách từ hệ thống OpenLibrary & Google Books...';
-        statusEl.classList.remove('hidden');
-    }
-    if (resultsEl) {
-        resultsEl.innerHTML = '';
-        resultsEl.classList.add('hidden');
-    }
-
-    fetch('/author/ebooks/api-lookup?q=' + encodeURIComponent(q), {
-        headers: { 'Accept': 'application/json' }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-        if (btn) btn.disabled = false;
-        if (!res || !res.success || !res.results || !res.results.length) {
-            if (statusEl) statusEl.textContent = (res && res.message) ? res.message : 'Không tìm thấy kết quả phù hợp.';
-            return;
-        }
-
-        window.__rvApiResultsCache = res.results;
-        if (statusEl) {
-            statusEl.textContent = 'Tìm thấy ' + res.results.length + ' kết quả phù hợp. Chọn một tác phẩm bên dưới để điền tự động vào biểu mẫu:';
-        }
-
-        var html = '';
-        res.results.forEach(function(item, idx) {
-            var coverImg = item.cover_url
-                ? '<img src="' + item.cover_url + '" class="h-16 w-12 shrink-0 rounded-lg object-cover border border-beige bg-sand">'
-                : '<div class="flex h-16 w-12 shrink-0 items-center justify-center rounded-lg border border-beige bg-sand text-[10px] font-bold text-espresso">SÁCH</div>';
-
-            html += '<div class="flex flex-col justify-between gap-3 rounded-2xl border border-beige bg-cream/40 p-3.5 sm:flex-row sm:items-center">'
-                + '<div class="flex items-start gap-3">'
-                + coverImg
-                + '<div>'
-                + '<div class="flex flex-wrap items-center gap-1.5">'
-                + '<span class="rounded bg-sand px-2 py-0.5 text-[10px] font-semibold text-espresso">' + item.source + '</span>'
-                + '<span class="text-xs text-taupe">Năm XB: ' + (item.published_year || 'N/A') + ' • ' + item.pages + ' trang</span>'
-                + '</div>'
-                + '<p class="mt-0.5 font-serif text-base font-bold text-espresso">' + item.title + '</p>'
-                + '<p class="text-xs font-medium text-mocha">Tác giả: ' + item.author + '</p>'
-                + '</div>'
-                + '</div>'
-                + '<button type="button" onclick="window.rvApplyApiBook(' + idx + ')" class="inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-espresso px-3.5 text-xs font-semibold text-cream shadow-sm transition hover:bg-mocha">Chọn sách này</button>'
-                + '</div>';
-        });
-
-        if (resultsEl) {
-            resultsEl.innerHTML = html;
-            resultsEl.classList.remove('hidden');
-        }
-    })
-    .catch(function() {
-        if (btn) btn.disabled = false;
-        if (statusEl) statusEl.textContent = 'Không thể kết nối dịch vụ tra cứu lúc này, vui lòng thử lại.';
-    });
-};
-
-window.rvApplyApiBook = function(idx) {
-    var item = window.__rvApiResultsCache[idx];
-    if (!item) return;
-
-    var titleInput = document.getElementById('title');
-    var descInput = document.getElementById('description');
-    var pagesInput = document.getElementById('pages');
-    var catSelect = document.getElementById('category_id');
-    var statusEl = document.getElementById('api-lookup-status');
-
-    if (titleInput) titleInput.value = item.title || '';
-    if (descInput) descInput.value = item.description || '';
-    if (pagesInput) pagesInput.value = item.pages || 250;
-    if (catSelect && !catSelect.value && catSelect.options.length > 1) {
-        catSelect.selectedIndex = 1;
-    }
-
-    if (statusEl) {
-        statusEl.textContent = 'Đang đồng bộ thông tin tác giả và ảnh bìa...';
-    }
-
-    var csrf = document.querySelector('meta[name="csrf-token"]');
-    fetch('/author/ebooks/api-prepare', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrf ? csrf.getAttribute('content') : ''
-        },
-        body: JSON.stringify({
-            author: item.author,
-            cover_url: item.cover_url
-        })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(prep) {
-        if (prep && prep.success) {
-            var authorSelect = document.getElementById('author_id');
-            if (authorSelect && prep.author_id) {
-                var found = false;
-                for (var i = 0; i < authorSelect.options.length; i++) {
-                    if (String(authorSelect.options[i].value) === String(prep.author_id)) {
-                        authorSelect.selectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    var opt = document.createElement('option');
-                    opt.value = prep.author_id;
-                    opt.textContent = prep.author_name;
-                    opt.selected = true;
-                    authorSelect.appendChild(opt);
-                }
-            }
-
-            if (prep.pre_uploaded_cover) {
-                var preCov = document.getElementById('pre_uploaded_cover');
-                if (preCov) preCov.value = prep.pre_uploaded_cover;
-            }
-
-            if (prep.cover_preview_url) {
-                var previewImg = document.getElementById('cover-preview-img');
-                var previewBox = document.getElementById('cover-preview-box');
-                var badge = document.getElementById('api-cover-badge');
-                if (previewImg) previewImg.src = prep.cover_preview_url;
-                if (previewBox) previewBox.classList.remove('hidden');
-                if (badge) badge.classList.remove('hidden');
-            }
-
-            if (statusEl) {
-                statusEl.textContent = 'Đã điền thông tin tác phẩm "' + item.title + '" và nạp ảnh bìa thành công.';
-            }
-        }
-    })
-    .catch(function() {});
-};
-</script>
 @endsection
