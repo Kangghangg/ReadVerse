@@ -57,13 +57,10 @@ php artisan serve
 
 ---
 
-## 3. Danh sách Tài khoản Đăng nhập Có sẵn
+## 3. Danh sách Tài khoản Đăng nhập Hệ thống
 
 | Vai trò (Role) | Email đăng nhập | Mật khẩu | Quyền hạn chính |
 | :--- | :--- | :--- | :--- |
-| **Quản trị viên (Admin 1)** | `admin@readverse.com` | `admin123` | Toàn quyền quản trị `/admin/*`, duyệt/từ chối sách, thùng rác, thống kê doanh thu |
-| **Quản trị viên (Admin 2)** | `admin@readverse.vn` | `Admin@123456` | Tài khoản Quản trị viên dự phòng |
+| **Quản trị viên (Admin)** | `admin@readverse.com` | `admin123` | Toàn quyền quản trị `/admin/*`, duyệt/từ chối sách, thùng rác, thống kê doanh thu |
 | **Tác giả (Author - Nhóm 3)** | `nhom3@readverse.com` | `nhom3read` | Cổng tác giả `/author/ebooks`, đăng sách PDF, tra cứu API, hồ sơ cá nhân |
-| **Tác giả (Author 2)** | `nguyennhatanh@readverse.vn` | `Author@123456` | Tài khoản Tác giả dự phòng |
-| **Độc giả (Reader)** | `ledubaokhang@gmail.com` | `User@123456` | Đọc sách 3D, giỏ hàng & thanh toán VietQR, tủ sách cá nhân, đánh giá sao |
-| **Độc giả (Reader 2)** | `minhtam.dev@gmail.com` | `User@123456` | Tài khoản Độc giả dự phòng |
+| **Độc giả (Reader)** | `baokhang.reader@gmail.com` | `User@123456` | Đọc sách 3D, giỏ hàng & thanh toán VietQR, tủ sách cá nhân, đánh giá sao |
