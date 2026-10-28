@@ -11,13 +11,15 @@ use App\Http\Controllers\Reader\CartController;
 use App\Http\Controllers\Reader\EbookReaderController;
 use App\Http\Controllers\Reader\HomeController;
 use App\Http\Controllers\Reader\LibraryController;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 // Fallback phuc vu file tu storage/app/public khi symlink public/storage bi mat hoac loi tren Windows
 Route::get('/storage/{path}', function (string $path) {
-    abort_unless(Storage::disk('public')->exists($path), 404);
-    return Storage::disk('public')->response($path);
+    $fullPath = storage_path('app/public/' . ltrim($path, '/\\'));
+    abort_unless(is_file($fullPath), 404);
+    return response()->file($fullPath);
 })->where('path', '.*');
 
 // Khu vuc Cong khai & Trang chu Doc gia
@@ -28,8 +30,9 @@ Route::get('/ebooks/{slug}', [HomeController::class, 'show'])->name('ebooks.show
 Route::get('/read/{slug}', [EbookReaderController::class, 'read'])->name('ebooks.read');
 
 // Dashboard redirect mac dinh cua Breeze
-Route::get('/dashboard', function () {
-    if (auth()->check() && auth()->user()->isAdmin()) {
+Route::get('/dashboard', function (Request $request) {
+    $user = $request->user();
+    if ($user instanceof User && $user->isAdmin()) {
         return redirect()->route('admin.ebooks.pending');
     }
     return redirect()->route('home');

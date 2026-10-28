@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -50,16 +49,17 @@ class User extends Authenticatable
 
         $relPath = ltrim($this->avatar, '/\\');
         $publicFile = public_path('storage/' . $relPath);
+        $storageFile = storage_path('app/public/' . $relPath);
 
-        if (!is_file($publicFile) && Storage::disk('public')->exists($relPath)) {
+        if (!is_file($publicFile) && is_file($storageFile)) {
             $destDir = dirname($publicFile);
             if (!is_dir($destDir)) {
                 @mkdir($destDir, 0775, true);
             }
-            @copy(Storage::disk('public')->path($relPath), $publicFile);
+            @copy($storageFile, $publicFile);
         }
 
-        if (!is_file($publicFile) && !Storage::disk('public')->exists($relPath)) {
+        if (!is_file($publicFile) && !is_file($storageFile)) {
             return $fallback;
         }
 

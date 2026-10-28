@@ -175,7 +175,7 @@ class ProfileController extends Controller
             return;
         }
 
-        $sourcePath = Storage::disk('public')->path($relativePath);
+        $sourcePath = storage_path('app/public/' . ltrim($relativePath, '/\\'));
         if (!is_file($sourcePath)) {
             return;
         }
