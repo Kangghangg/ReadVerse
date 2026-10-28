@@ -8,9 +8,18 @@
         <div class="bg-espresso px-6 py-8 text-cream sm:px-10">
             <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-end sm:justify-between">
                 <div class="flex flex-col items-center gap-5 sm:flex-row">
-                    <div class="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-cream bg-sand shadow-lg">
-                        <img id="avatar-preview-img" src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-full w-full object-cover">
-                    </div>
+                    <label for="avatar-file-input" class="group relative h-24 w-24 shrink-0 cursor-pointer overflow-hidden rounded-full border-4 border-cream bg-sand shadow-lg" title="Nhấn để chọn ảnh đại diện mới">
+                        <img
+                            id="avatar-preview-img"
+                            src="{{ $user->avatar_url }}"
+                            alt="{{ $user->name }}"
+                            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?background=4B3828&color=F8F3EA&bold=true&name={{ urlencode($user->name) }}';"
+                            class="h-full w-full object-cover transition group-hover:opacity-80"
+                        >
+                        <span class="absolute inset-x-0 bottom-0 bg-espresso/75 py-0.5 text-center text-[10px] font-semibold text-cream opacity-0 transition group-hover:opacity-100">
+                            Đổi ảnh
+                        </span>
+                    </label>
                     <div class="text-center sm:text-left">
                         <div class="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                             <span class="rounded-full bg-cream/20 px-3 py-0.5 text-xs font-semibold uppercase tracking-wider text-cream">
@@ -88,16 +97,18 @@
                     @method('PATCH')
 
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-espresso">Ảnh đại diện</label>
+                        <label for="avatar-file-input" class="block text-xs font-semibold uppercase tracking-wider text-espresso">Ảnh đại diện</label>
+                        <input type="hidden" name="avatar_base64" id="avatar-base64-input" value="">
                         <div class="mt-2 flex flex-wrap items-center gap-4">
                             <input
+                                id="avatar-file-input"
                                 type="file"
                                 name="avatar"
-                                accept="image/jpeg,image/png,image/jpg,image/webp"
-                                onchange="if(this.files && this.files[0]){ document.getElementById('avatar-preview-img').src = URL.createObjectURL(this.files[0]); }"
-                                class="block w-full max-w-xs text-xs text-mocha file:mr-3 file:rounded-xl file:border-0 file:bg-sand file:px-4 file:py-2 file:text-xs file:font-semibold file:text-espresso hover:file:bg-beige"
+                                accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/avif"
+                                onchange="if(this.files && this.files[0]){ var f = this.files[0]; document.getElementById('avatar-preview-img').src = URL.createObjectURL(f); var r = new FileReader(); r.onload = function(ev){ var b = document.getElementById('avatar-base64-input'); if(b) b.value = ev.target.result || ''; }; r.readAsDataURL(f); }"
+                                class="block w-full max-w-xs text-xs text-mocha file:mr-3 file:cursor-pointer file:rounded-xl file:border-0 file:bg-sand file:px-4 file:py-2 file:text-xs file:font-semibold file:text-espresso hover:file:bg-beige"
                             >
-                            <span class="text-xs text-taupe">Hỗ trợ JPG, PNG, WEBP (Tối đa 4MB)</span>
+                            <span class="text-xs text-taupe">Hỗ trợ JPG, PNG, WEBP, GIF (Tối đa 10MB)</span>
                         </div>
                         <x-input-error class="mt-1.5" :messages="$errors->get('avatar')" />
                     </div>

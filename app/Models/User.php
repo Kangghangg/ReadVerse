@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -37,15 +38,32 @@ class User extends Authenticatable
 
     public function getAvatarUrlAttribute(): string
     {
+        $fallback = 'https://ui-avatars.com/api/?background=4B3828&color=F8F3EA&bold=true&name=' . urlencode($this->name);
+
         if (!$this->avatar) {
-            return 'https://ui-avatars.com/api/?background=4B3828&color=F8F3EA&bold=true&name=' . urlencode($this->name);
+            return $fallback;
         }
 
-        if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+        if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://') || str_starts_with($this->avatar, 'data:image/')) {
             return $this->avatar;
         }
 
-        return asset('storage/' . ltrim($this->avatar, '/'));
+        $relPath = ltrim($this->avatar, '/\\');
+        $publicFile = public_path('storage/' . $relPath);
+
+        if (!is_file($publicFile) && Storage::disk('public')->exists($relPath)) {
+            $destDir = dirname($publicFile);
+            if (!is_dir($destDir)) {
+                @mkdir($destDir, 0775, true);
+            }
+            @copy(Storage::disk('public')->path($relPath), $publicFile);
+        }
+
+        if (!is_file($publicFile) && !Storage::disk('public')->exists($relPath)) {
+            return $fallback;
+        }
+
+        return asset('storage/' . str_replace('\\', '/', $relPath));
     }
 
     public function profile(): HasOne

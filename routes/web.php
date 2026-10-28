@@ -12,6 +12,13 @@ use App\Http\Controllers\Reader\EbookReaderController;
 use App\Http\Controllers\Reader\HomeController;
 use App\Http\Controllers\Reader\LibraryController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+
+// Fallback phuc vu file tu storage/app/public khi symlink public/storage bi mat hoac loi tren Windows
+Route::get('/storage/{path}', function (string $path) {
+    abort_unless(Storage::disk('public')->exists($path), 404);
+    return Storage::disk('public')->response($path);
+})->where('path', '.*');
 
 // Khu vuc Cong khai & Trang chu Doc gia
 Route::get('/', [HomeController::class, 'index'])->name('home');
