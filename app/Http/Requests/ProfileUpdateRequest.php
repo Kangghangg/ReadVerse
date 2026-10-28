@@ -13,6 +13,15 @@ class ProfileUpdateRequest extends FormRequest
         return $this->user() !== null && !$this->user()->isAdmin();
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('email') && is_string($this->input('email'))) {
+            $this->merge([
+                'email' => mb_strtolower(trim($this->input('email'))),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -29,7 +38,8 @@ class ProfileUpdateRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:255'],
             'website' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string', 'max:1500'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
+            'avatar' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,gif,avif', 'max:10240'],
+            'avatar_base64' => ['nullable', 'string'],
         ];
     }
 
@@ -40,8 +50,11 @@ class ProfileUpdateRequest extends FormRequest
             'email.required' => 'Vui lòng nhập địa chỉ email.',
             'email.email' => 'Địa chỉ email không đúng định dạng.',
             'email.unique' => 'Địa chỉ email này đã được sử dụng.',
+            'avatar.file' => 'Tệp tải lên không hợp lệ.',
             'avatar.image' => 'Tệp tải lên phải là định dạng hình ảnh.',
-            'avatar.max' => 'Kích thước ảnh đại diện tối đa là 4MB.',
+            'avatar.mimes' => 'Ảnh đại diện chỉ hỗ trợ định dạng JPG, JPEG, PNG, WEBP, GIF hoặc AVIF.',
+            'avatar.max' => 'Kích thước ảnh đại diện tối đa là 8MB.',
+            'avatar.uploaded' => 'Không thể tải ảnh lên máy chủ. Vui lòng chọn ảnh có dung lượng nhỏ hơn 8MB.',
         ];
     }
 }

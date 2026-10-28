@@ -69,6 +69,7 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validated();
+        $oldName = $user->name;
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
@@ -77,11 +78,47 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
-        if ($request->hasFile('avatar')) {
+        $newAvatarPath = null;
+
+        if ($request->hasFile('avatar') && $request->file('avatar')->isValid()) {
+            Storage::disk('public')->makeDirectory('avatars');
+
+            $avatarFile = $request->file('avatar');
+            $ext = strtolower($avatarFile->getClientOriginalExtension()) ?: 'jpg';
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'], true)) {
+                $ext = 'jpg';
+            }
+            $filename = 'avatar_' . $user->id . '_' . time() . '.' . $ext;
+            $newAvatarPath = $avatarFile->storeAs('avatars', $filename, 'public');
+        } elseif (!empty($validated['avatar_base64']) && preg_match('/^data:image\/(\w+);base64,/', $validated['avatar_base64'], $matches)) {
+            $ext = strtolower($matches[1] ?? 'jpg');
+            if ($ext === 'jpeg') {
+                $ext = 'jpg';
+            }
+            if (!in_array($ext, ['jpg', 'png', 'webp', 'gif'], true)) {
+                $ext = 'jpg';
+            }
+            $base64Data = substr($validated['avatar_base64'], strpos($validated['avatar_base64'], ',') + 1);
+            $binary = base64_decode($base64Data, true);
+            if ($binary !== false && strlen($binary) > 0 && strlen($binary) <= 10 * 1024 * 1024) {
+                Storage::disk('public')->makeDirectory('avatars');
+                $relPath = 'avatars/avatar_' . $user->id . '_' . time() . '.' . $ext;
+                Storage::disk('public')->put($relPath, $binary);
+                $newAvatarPath = $relPath;
+            }
+        }
+
+        if ($newAvatarPath) {
             if ($user->avatar && !str_starts_with($user->avatar, 'http')) {
                 Storage::disk('public')->delete($user->avatar);
+                $oldPublicFile = public_path('storage/' . ltrim($user->avatar, '/'));
+                if (is_file($oldPublicFile) && !is_link(public_path('storage'))) {
+                    @unlink($oldPublicFile);
+                }
             }
-            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+
+            $user->avatar = $newAvatarPath;
+            $this->syncToPublicStorage($newAvatarPath);
         }
 
         $user->save();
@@ -97,18 +134,16 @@ class ProfileController extends Controller
         );
 
         if ($user->isAuthor()) {
-            $authorRecord = Author::where('name', $user->name)->first();
+            $authorRecord = Author::whereIn('name', array_unique([$oldName, $user->name]))->first();
             if ($authorRecord) {
-                $authorUpdate = [];
+                $authorUpdate = ['name' => $user->name];
                 if (!empty($validated['bio'])) {
                     $authorUpdate['bio'] = $validated['bio'];
                 }
                 if ($user->avatar) {
                     $authorUpdate['avatar'] = $user->avatar;
                 }
-                if (!empty($authorUpdate)) {
-                    $authorRecord->update($authorUpdate);
-                }
+                $authorRecord->update($authorUpdate);
             }
         }
 
@@ -131,5 +166,27 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    protected function syncToPublicStorage(string $relativePath): void
+    {
+        $publicStorageRoot = public_path('storage');
+        if (is_link($publicStorageRoot)) {
+            return;
+        }
+
+        $sourcePath = Storage::disk('public')->path($relativePath);
+        if (!is_file($sourcePath)) {
+            return;
+        }
+
+        $destPath = $publicStorageRoot . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, ltrim($relativePath, '/\\'));
+        $destDir = dirname($destPath);
+
+        if (!is_dir($destDir)) {
+            @mkdir($destDir, 0775, true);
+        }
+
+        @copy($sourcePath, $destPath);
     }
 }
