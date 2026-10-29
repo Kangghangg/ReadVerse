@@ -65,8 +65,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:author,admin')->prefix('author')->name('author.')->group(function () {
         Route::get('/ebooks', [AuthorEbookController::class, 'index'])->name('ebooks.index');
         Route::get('/ebooks/create', [AuthorEbookController::class, 'create'])->name('ebooks.create');
-        Route::get('/ebooks/api-lookup', [AuthorEbookController::class, 'lookupExternalApi'])->name('ebooks.api_lookup');
-        Route::post('/ebooks/api-prepare', [AuthorEbookController::class, 'prepareApiSelection'])->name('ebooks.api_prepare');
+        Route::get('/ebooks/api-lookup', [AuthorEbookController::class, 'lookupExternalApi'])->middleware('throttle:30,1')->name('ebooks.api_lookup');
+        Route::post('/ebooks/api-prepare', [AuthorEbookController::class, 'prepareApiSelection'])->middleware('throttle:30,1')->name('ebooks.api_prepare');
         Route::post('/ebooks/upload-chunk', [AuthorEbookController::class, 'uploadChunk'])->name('ebooks.upload_chunk');
         Route::post('/ebooks', [AuthorEbookController::class, 'store'])->name('ebooks.store');
         Route::get('/ebooks/{id}/edit', [AuthorEbookController::class, 'edit'])->name('ebooks.edit');
